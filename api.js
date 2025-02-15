@@ -85,6 +85,7 @@ app.get('/ratings', (req, res) => {
 app.get('/help', (req, res) => {
     const helpMessage = {
         message: 'Welcome to the Confession API!',
+        github: 'https://github.com/RadioactivePotato/confessions-api'
         endpoints: {
             '/getConfession': 'GET a confession.',
             '/ratings?id=<confessionId>': 'GET ratings for a specific confession by ID.',
