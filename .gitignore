@@ -1,0 +1,34 @@
+node_modules/
+
+# Confessions saves
+confessions.json
+ratings.json
+comments.json
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Dependency directories
+jspm_packages/
+
+# Build output
+/dist
+/build
+
+# Environment variables
+.env
+.env.local
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+
+# OS-specific files
+.DS_Store
+Thumbs.db

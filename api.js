@@ -1,4 +1,3 @@
-// npm install express body-parser
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
@@ -9,10 +8,12 @@ app.use(bodyParser.json());
 
 const confessionsFile = 'confessions.json';
 const ratingsFile = 'ratings.json';
+const commentsFile = 'comments.json';
 
-// load data from backup save
+// Load data from backup saves from above
 let confessions = [];
 let ratings = {};
+let comments = {};
 let confessionIdCounter = 1;
 
 if (fs.existsSync(confessionsFile)) {
@@ -21,8 +22,22 @@ if (fs.existsSync(confessionsFile)) {
 if (fs.existsSync(ratingsFile)) {
     ratings = JSON.parse(fs.readFileSync(ratingsFile));
 }
+if (fs.existsSync(commentsFile)) {
+    comments = JSON.parse(fs.readFileSync(commentsFile));
+}
 
-// log requests
+// save data to file
+function saveConfessionsToFile() {
+    fs.writeFileSync(confessionsFile, JSON.stringify(confessions, null, 2));
+}
+function saveRatingsToFile() {
+    fs.writeFileSync(ratingsFile, JSON.stringify(ratings, null, 2));
+}
+function saveCommentsToFile() {
+    fs.writeFileSync(commentsFile, JSON.stringify(comments, null, 2));
+}
+
+// log the requests
 app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
     if (Object.keys(req.body).length > 0) {
@@ -34,38 +49,14 @@ app.use((req, res, next) => {
     next();
 });
 
-// save confessions to backup
-function saveConfessionsToFile() {
-    fs.writeFileSync(confessionsFile, JSON.stringify(confessions, null, 2));
-}
-
-// save ratings to file
-function saveRatingsToFile() {
-    fs.writeFileSync(ratingsFile, JSON.stringify(ratings, null, 2));
-}
-
-/*
 // GET confession
 app.get('/getConfession', (req, res) => {
     if (confessions.length === 0) {
         console.log('No confessions available... yet');
         return res.status(404).json({ message: 'No confessions available... yet' });
     }
-    const confession = { ...confessions[0], id: confessionIdCounter++ }; // doesnt delete when viewed
-    console.log('Confession retrieved:', confession);
-    res.json(confession);
-});
-*/
-
-// GET confession
-app.get('/getConfession', (req, res) => {
-    if (confessions.length === 0) {
-        console.log('No confessions available... yet');
-        return res.status(404).json({ message: 'No confessions available... yet' });
-    }
-    // GET a random confession
     const randomIndex = Math.floor(Math.random() * confessions.length);
-    const confession = { ...confessions[randomIndex], id: confessionIdCounter++ }; // generate id
+    const confession = { ...confessions[randomIndex], id: confessionIdCounter++ };
     console.log('Confession retrieved:', confession);
     res.json(confession);
 });
@@ -81,21 +72,15 @@ app.get('/ratings', (req, res) => {
     res.json({ id: confessionId, ratings: ratings[confessionId] });
 });
 
-// SEEK professional help
-app.get('/help', (req, res) => {
-    const helpMessage = {
-        message: 'Welcome to the Confession API!',
-        github: 'https://github.com/RadioactivePotato/confessions-api'
-        endpoints: {
-            '/getConfession': 'GET a confession.',
-            '/ratings?id=<confessionId>': 'GET ratings for a specific confession by ID.',
-            '/help': 'GET help.',
-            '/postConfession': 'POST a new confession.',
-            '/postRatings': 'POST a new rating for a confession.'
-        }
-    };
-    console.log('Help sent:', helpMessage);
-    res.json(helpMessage);
+// GET comments for a confession
+app.get('/getComments', (req, res) => {
+    const confessionId = parseInt(req.query.id, 10);
+    if (!confessionId || !comments[confessionId]) {
+        console.log(`No comments found for confession ${confessionId}`);
+        return res.status(404).json({ message: 'No comments found for the given confession ID.' });
+    }
+    console.log(`Comments retrieved for confession ${confessionId}:`, comments[confessionId]);
+    res.json({ id: confessionId, comments: comments[confessionId] });
 });
 
 // POST a confession
@@ -128,8 +113,41 @@ app.post('/postRatings', (req, res) => {
     res.json({ message: 'Rating submitted successfully!' });
 });
 
-// start api
-app.listen(port, () => {
-    console.log(`API is running on http://localhost:${port}, try curl https://localhost:${port}/help`);
+// POST a comment
+app.post('/postComment', (req, res) => {
+    const { id, comment } = req.body;
+    if (!id || !comment || typeof comment !== 'string') {
+        console.log('Invalid comment submission:', req.body);
+        return res.status(400).json({ message: 'Invalid ID or comment text.' });
+    }
+    if (!comments[id]) {
+        comments[id] = [];
+    }
+    comments[id].push(comment);
+    console.log(`Comment sent for confession ${id}: ${comment}`);
+    saveCommentsToFile();
+    res.json({ message: 'Comment sent sucessfully!' });
 });
 
+// GET help
+app.get('/help', (req, res) => {
+    const helpMessage = {
+        message: 'Welcome to the Confession API!',
+        github: 'https://github.com/RadioactivePotato/confessions-api',
+        endpoints: {
+            '/getConfession': 'GET a confession.',
+            '/ratings?id=<confessionId>': 'GET ratings for a specific confession by ID.',
+            '/getComments?id=<confessionId>': 'GET comments for a confession.',
+            '/postConfession': 'POST a new confession.',
+            '/postRatings': 'POST a new rating for a confession.',
+            '/postComment': 'POST a comment for a confession.'
+        }
+    };
+    console.log('Professional help sent:', helpMessage);
+    res.json(helpMessage);
+});
+
+// Start API
+app.listen(port, () => {
+    console.log(`API is running on http://localhost:${port}, try curl http://localhost:${port}/help`);
+});

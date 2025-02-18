@@ -1,12 +1,12 @@
 # Confessions API
 
-An API for sending, reading, and rating anonymous confessions written in JavaScript 
+An API for sending, reading, rating, and commenting anonymous confessions written in JavaScript 
 
 ## Setup
 ```
 git clone https://github.com/RadioactivePotato/confessions-api
 cd confessions-api
-npm install express body-parser
+npm install
 node api.js
 ```
 
@@ -19,12 +19,14 @@ GET:
 /help
 /getConfession
 /ratings?id=<confessionID>
+/getComments?id=<confessionID>
 ```
 
 POST:
 ```
 /postRatings
 /postConfession
+/postComment
 ```
 
 ## Example commands
@@ -41,6 +43,13 @@ curl http://localhost:45891/getConfession
 ```
 curl http://localhost:45891/ratings?id=<confessionID>
 ```
+### GET Comments
+```
+curl http://localhost:45891/getComments?id=<confessionID>
+```
+
+<hr>
+
 ### POST Confession
 ```
 curl -X POST http://localhost:45891/postConfession -H "Content-Type: application/json" -d "{\"text\": \"I'm still stuck in vim\"}"
@@ -48,6 +57,10 @@ curl -X POST http://localhost:45891/postConfession -H "Content-Type: application
 ### POST Ratings
 ```
 curl -X POST http://localhost:45891/postRatings -H "Content-Type: application/json" -d "{\"id\": 1, \"rating\": 5}"
+```
+### POST Comment
+```
+curl -X POST http://localhost:45891/postComment -H "Content-Type: application/json" -d "{\"id\": 1, \"comment\": \"Hello world!\"}"
 ```
 
 <hr>
@@ -67,6 +80,13 @@ curl https://confessions.krunch.hackclub.app/getConfession
 ```
 curl https://confessions.krunch.hackclub.app/ratings?id=<confessionID>
 ```
+### GET Comments
+```
+curl https://confessions.krunch.hackclub.app/getComments?id=<confessionID>
+```
+
+<hr>
+
 ### POST Confession
 ```
 curl -X POST https://confessions.krunch.hackclub.app/postConfession -H "Content-Type: application/json" -d "{\"text\": \"I'm still stuck in vim\"}"
@@ -74,6 +94,10 @@ curl -X POST https://confessions.krunch.hackclub.app/postConfession -H "Content-
 ### POST Ratings
 ```
 curl -X POST https://confessions.krunch.hackclub.app/postRatings -H "Content-Type: application/json" -d "{\"id\": 1, \"rating\": 5}"
+```
+### POST Comment
+```
+curl -X POST https://confessions.krunch.hackclub.app/postComment -H "Content-Type: application/json" -d "{\"id\": 1, \"comment\": \"Hello world!\"}"
 ```
 
 </details>
